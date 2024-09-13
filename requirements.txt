@@ -1,0 +1,4 @@
+streamlit
+twelvelabs
+requests
+python-dotenv
