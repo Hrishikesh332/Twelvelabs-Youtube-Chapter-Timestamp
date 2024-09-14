@@ -1,21 +1,16 @@
 import streamlit as st
 import tempfile
 import os
-import requests
 from twelvelabs import TwelveLabs
-from twelvelabs.models.task import Task
-from dotenv import load_dotenv
+from utils import (
+    API_KEY, process_video, fetch_existing_videos,
+    get_video_url, get_hls_player_html, generate_timestamps
+)
 
-# Load the environment variables
-load_dotenv()
-
-API_KEY = os.getenv("API_KEY")
-INDEX_ID = os.getenv("INDEX_ID")
-
-# Set up Streamlit page configuration
+# Set up the Streamlit page configuration
 st.set_page_config(page_title="YouTube Chapter Timestamp Generator", layout="wide")
 
-# Apply custom CSS for background and styling
+# Add custom CSS for page styling
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] {
@@ -33,93 +28,72 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Display the title
-st.markdown("<h2 style='text-align: center;'>YouTube Chapter Timestamp Generator ✍</h1>", unsafe_allow_html=True)
+# Add page title and separator with markdown
+st.markdown("<h2 style='text-align: center;'>YouTube Chapter Timestamp Generator ✍</h2>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Utility function to convert seconds to MM:SS format
-def seconds_to_mmss(seconds):
-    minutes, seconds = divmod(int(seconds), 60)
-    return f"{minutes:02d}:{seconds:02d}"
 
-# Utility callback function to update task status
-def on_task_update(task: Task):
-    st.text(f"Status: {task.status}")
+# Utility function for uploading and processing of new videos
+def upload_and_process_video():
 
-# Utility function to fetch existing videos from the API
-def fetch_existing_videos():
-    url = f"https://api.twelvelabs.io/v1.2/indexes/{INDEX_ID}/videos?page=1&page_limit=10&sort_by=created_at&sort_option=desc"
-    headers = {
-        "accept": "application/json",
-        "x-api-key": API_KEY,
-        "Content-Type": "application/json"
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response.json()['data']
-    else:
-        st.error(f"Failed to fetch videos: {response.text}")
-        return []
+    video_type = st.selectbox("Select video type:", ["Basic Video (less than 30 mins)", "Podcast (30 mins to 1 hour)"])
+    uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi"])
 
-# Utility function to generate timestamps for a given video ID
-def generate_timestamps(video_id):
+    if uploaded_file and st.button("Process Video"):
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            video_path = tmp_file.name
+        try:
+            with st.spinner("Processing video..."):
+                client = TwelveLabs(api_key=API_KEY)
+                timestamps = process_video(client, video_path, video_type)
+            st.success("Video processed successfully!")
+            st.subheader("YouTube Chapter Timestamps")
+            st.write("Copy the Timestamp description and add it to the Youtube Video Description")
+            st.code(timestamps, language="")
+        except Exception as e:
+            st.error(str(e))
+        finally:
+            os.unlink(video_path)
+
+
+# Utility function for selection and timestamp generation for existing videos
+def select_existing_video():
+
     try:
-        client = TwelveLabs(api_key=API_KEY)
-        with st.spinner("Generating chapters..."):
-            gist = client.generate.summarize(video_id=video_id, type="chapter")
-
-        st.subheader("YouTube Chapter Timestamps")
-        chapter_text = ""
-        for chapter in gist.chapters:
-            time_formatted = seconds_to_mmss(chapter.start)
-            chapter_line = f"{time_formatted}-{chapter.chapter_title}"
-            chapter_text += chapter_line + "\n"
+        existing_videos = fetch_existing_videos()
+        video_options = {f"{video['metadata']['filename']} ({video['_id']})": video['_id'] for video in existing_videos}
         
-        st.write("Copy the Timestamp description and add it to the Youtube Video Description")
-        st.code(chapter_text, language="")
+        if video_options:
+            selected_video = st.selectbox("Select a video:", list(video_options.keys()))
+            video_id = video_options[selected_video]
+            
+            video_url = get_video_url(video_id)
+            if video_url:
+                st.markdown(f"### Selected Video: {selected_video}")
+                st.components.v1.html(get_hls_player_html(video_url), height=600)
+            
+            if st.button("Generate Timestamps"):
+                with st.spinner("Generating timestamps..."):
+                    client = TwelveLabs(api_key=API_KEY)
+                    timestamps, _ = generate_timestamps(client, video_id)
+                st.subheader("YouTube Chapter Timestamps")
+                st.write("Copy the Timestamp description and add it to the Youtube Video Description")
+                st.code(timestamps, language="")
+        else:
+            st.warning("No existing videos found in the index.")
     except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
+        st.error(str(e))
 
-# Main function
 def main():
-    # Tabs for different options
+ 
     tab1, tab2 = st.tabs(["**Upload a new video**", "**Select an existing video**"])
 
     with tab1:
-        uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi"])
-
-        if uploaded_file is not None:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
-                tmp_file.write(uploaded_file.read())
-                video_path = tmp_file.name
-
-            try:
-                client = TwelveLabs(api_key=API_KEY)
-                with st.spinner("Creating task..."):
-                    task = client.task.create(index_id=INDEX_ID, file=video_path)
-                    st.success(f"Task created: id={task.id}")
-
-                with st.spinner("Processing video..."):
-                    task.wait_for_done(sleep_interval=5, callback=on_task_update)
-                    if task.status != "ready":
-                        st.error(f"Indexing failed with status {task.status}")
-                    else:
-                        st.success(f"Video processed successfully. Video ID: {task.video_id}")
-                        generate_timestamps(task.video_id)
-
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-            finally:
-                os.unlink(video_path)
+        upload_and_process_video()
 
     with tab2:
-        existing_videos = fetch_existing_videos()
-        video_options = {f"{video['metadata']['filename']} ({video['_id']})": video['_id'] for video in existing_videos}
-        selected_video = st.selectbox("Select a video:", list(video_options.keys()))
-        video_id = video_options[selected_video]
-
-        if st.button("Generate Timestamps"):
-            generate_timestamps(video_id)
+        select_existing_video()
 
 if __name__ == "__main__":
     main()

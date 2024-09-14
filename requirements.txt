@@ -2,3 +2,4 @@ streamlit
 twelvelabs
 requests
 python-dotenv
+moviepy
