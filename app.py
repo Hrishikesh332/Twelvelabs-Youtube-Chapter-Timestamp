@@ -59,7 +59,7 @@ def upload_and_process_video():
 
 # Utility function for selection and timestamp generation for existing videos
 def select_existing_video():
-
+    st.write("Click on the video box, to play")
     try:
         existing_videos = fetch_existing_videos()
         video_options = {f"{video['metadata']['filename']} ({video['_id']})": video['_id'] for video in existing_videos}
