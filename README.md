@@ -58,6 +58,10 @@ Try the Application Now -
     YouTube Chapter Timestamp App
 </a>
 
+
+Example Podcast (50 min) Highlight Generator -
+[highlight](https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp/blob/main/src/highlight.gif)
+
 ## Features
 
 🎯 **Chapter Generation**: Automatically detect and create timestamps with highlights for video chapters.
