@@ -4,3 +4,4 @@ requests
 python-dotenv
 moviepy
 m3u8
+yt_dlp
