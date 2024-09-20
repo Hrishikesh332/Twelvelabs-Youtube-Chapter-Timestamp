@@ -30,11 +30,13 @@ def generate_timestamps(client, video_id, start_time=0):
     except Exception as e:
         raise Exception(f"An error occurred while generating timestamps: {str(e)}")
 
+# Utitily function to trim the video based on the time stamps
 def trim_video(input_path, output_path, start_time, end_time):
     with VideoFileClip(input_path) as video:
         new_video = video.subclip(start_time, end_time)
         new_video.write_videofile(output_path, codec="libx264", audio_codec="aac")
 
+# Based on the speicific Index_ID, fetching all the video_id
 def fetch_existing_videos():
     url = f"https://api.twelvelabs.io/v1.2/indexes/{INDEX_ID}/videos?page=1&page_limit=10&sort_by=created_at&sort_option=desc"
     headers = {"accept": "application/json", "x-api-key": API_KEY, "Content-Type": "application/json"}
@@ -44,6 +46,7 @@ def fetch_existing_videos():
     else:
         raise Exception(f"Failed to fetch videos: {response.text}")
 
+# Utility function to retrieve the URL of the video with video_id
 def get_video_url(video_id):
     url = f"https://api.twelvelabs.io/v1.2/indexes/{INDEX_ID}/videos/{video_id}"
     headers = {"accept": "application/json", "x-api-key": API_KEY}
@@ -54,6 +57,8 @@ def get_video_url(video_id):
     else:
         raise Exception(f"Failed to get video URL: {response.text}")
 
+
+# Utility function to handle and process the video clips larger than 30 mins
 def process_video(client, video_path, video_type):
     with VideoFileClip(video_path) as clip:
         duration = clip.duration
@@ -95,6 +100,8 @@ def process_video(client, video_path, video_type):
         
         return timestamps, task1.video_id
 
+
+# Utility function to render the video on the UI
 def get_hls_player_html(video_url):
     return f"""
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -139,6 +146,7 @@ def get_hls_player_html(video_url):
     </script>
     """
 
+# Function to downlaod the video segments after the trimming is done
 def download_video_segment(video_id, start_time, end_time=None):
     video_url = get_video_url(video_id)
     if not video_url:
@@ -170,6 +178,7 @@ def download_video_segment(video_id, start_time, end_time=None):
     buffer.seek(0)
     return buffer.getvalue()
 
+# Utility function to download the indexed video with the url from video_id
 def download_video(url, output_filename):
     ydl_opts = {
         'format': 'best',
@@ -179,7 +188,7 @@ def download_video(url, output_filename):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
-
+# Utitily Function to Parse the Segment
 def parse_segments(segment_text):
     lines = segment_text.strip().split('\n')
     segments = []
@@ -194,11 +203,14 @@ def parse_segments(segment_text):
         segments.append((start_time, end_time, description.strip()))
     return segments
 
+
+# Utiltiy function to segment the video
 def create_video_segments(video_url, segment_info):
     full_video = "full_video.mp4"
     segments = parse_segments(segment_info)
 
     try:
+        # Download the full video clip
         download_video(video_url, full_video)
         
         for i, (start_time, end_time, description) in enumerate(segments):

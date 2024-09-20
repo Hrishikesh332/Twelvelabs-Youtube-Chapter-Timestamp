@@ -30,6 +30,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Streamlit Page Header
 st.markdown("<h2 style='text-align: center;'>YouTube Chapter Timestamp Generator ✍</h2>", unsafe_allow_html=True)
 st.markdown("---")
 
@@ -44,7 +45,7 @@ if 'video_url' not in st.session_state:
     st.session_state.video_url = None
 
 
-
+# Function to Display the Segment and also Download
 def display_segment(file_name, description, segment_index):
     if os.path.exists(file_name):
         st.write(f"### {description}")
@@ -63,6 +64,8 @@ def display_segment(file_name, description, segment_index):
     else:
         st.warning(f"File {file_name} not found. It may have been deleted or moved.")
 
+
+# Function to process the segment
 def process_and_display_segments():
     if not st.session_state.video_url:
         st.error("Video URL not found. Please reprocess the video.")
@@ -87,7 +90,7 @@ def process_and_display_segments():
     status_text.text("All segments processed!")
 
 
-
+# Uplaoding feature and the processing of the video
 def upload_and_process_video():
     video_type = st.selectbox("Select video type:", ["Basic Video (less than 30 mins)", "Podcast (30 mins to 1 hour)"])
     uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi"])
@@ -113,7 +116,7 @@ def upload_and_process_video():
         finally:
             os.unlink(video_path)
 
-
+# Selecting the existing video from the Index and generating timestamps highlight
 def select_existing_video():
     try:
         existing_videos = fetch_existing_videos()
@@ -143,6 +146,7 @@ def select_existing_video():
         st.error(str(e))
 
 
+# Function to display the timestamps and the segments
 def display_timestamps_and_segments():
     if st.session_state.timestamps:
         st.subheader("YouTube Chapter Timestamps")
