@@ -3,3 +3,4 @@ twelvelabs
 requests
 python-dotenv
 moviepy
+m3u8
