@@ -76,6 +76,11 @@ Example Podcast (50 min) Highlight Generator -
 - **Backend**: Python
 - **Deployment**: Streamlit Cloud
 
+
+## Flow Breakdown
+
+![https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp/blob/main/src/flow.png](https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp/blob/main/src/flow.png)
+
 ## Instructions on running project locally
 
 To run the YouTube Chapter Highlight Generator locally, follow these steps -
