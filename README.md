@@ -61,14 +61,8 @@ Try the Application Now -
 
 Demo and Video Explanation -
 
-<div>
-    <a href="https://youtu.be/z-_PJqjTZmM>
-      <p>Interview Analyzer Demo 🎥 - Watch Video</p>
-    </a>
-    <a href="https://youtu.be/J2vGUEEjHWI">
-      <img style="max-width:300px;" src="https://youtu.be/z-_PJqjTZmM">
-    </a>
-  </div>
+
+  [![Watch the video](https://img.youtube.com/vi/z-_PJqjTZmM/hqdefault.jpg)](https://youtu.be/z-_PJqjTZmM)
 
 ## Features
 
