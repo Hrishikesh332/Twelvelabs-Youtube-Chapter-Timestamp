@@ -59,8 +59,8 @@ Try the Application Now -
 </a>
 
 
-Example Podcast (50 min) Highlight Generator -
-![highlight](https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp/blob/main/src/highlight.gif)
+Demo and Video Explanation -
+![highlight](https://youtu.be/z-_PJqjTZmM)
 
 ## Features
 
