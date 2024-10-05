@@ -78,11 +78,6 @@ Demo and Video Explanation -
 - **Backend**: Python
 - **Deployment**: Streamlit Cloud
 
-
-## Flow Breakdown
-
-![https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp/blob/main/src/flow.png](https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp/blob/main/src/flow.png)
-
 ## Instructions on running project locally
 
 To run the YouTube Chapter Highlight Generator locally, follow these steps -
@@ -91,7 +86,7 @@ To run the YouTube Chapter Highlight Generator locally, follow these steps -
 
 ```bash
 git clone https://github.com/Hrishikesh332/Twelvelabs-Youtube-Chapter-Timestamp.git
-
+```
 
 Step 2  -
 
